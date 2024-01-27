@@ -13,6 +13,7 @@ const Chat = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          question: question,
           someDate: true,
         }),
       });

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
 export async function POST(request) {
+  const { question } = await request.json();
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -16,7 +17,7 @@ export async function POST(request) {
       },
       {
         role: "user",
-        content: "What's the greatest vdeo game of all time? How was it made?"
+        content: question,
       }
     ],
     temperature: 0,
