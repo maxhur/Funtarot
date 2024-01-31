@@ -9,22 +9,30 @@ const Chat = () => {
   const handleQuestionSubmit = async () => {
     try {
       const cardResponses = [];
+      let questionCard = "";
 
       for (const card of tarotCards) {
-        const fetchResponse = await fetch("/api/chat-gpt", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: card,
-            someDate: true,
-          }),
-        });
-        const result = await fetchResponse.json();
-        cardResponses.push({ card, response: result.choices });
+        questionCard += card + ",";
       }
+
+      questionCard =
+        "my three cards for past present and future are " + questionCard;
+
+      const fetchResponse = await fetch("/api/chat-gpt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          question: questionCard,
+          someDate: true,
+        }),
+      });
+      const result = await fetchResponse.json();
+
+      cardResponses.push({ response: result.choices });
       setResponses(cardResponses);
+      console.log(cardResponses)
     } catch (error) {
       console.error("Error fetching response:", error);
     }
@@ -35,7 +43,6 @@ const Chat = () => {
       <div className="bg-white p-8 rounded shadow-md">
         <h1 className="text-3xl font-bold mb-4">Tarot Card Reading</h1>
 
-        {/* Input fields for tarot cards */}
         {tarotCards.map((card, index) => (
           <div key={index} className="mb-4">
             <label className="block text-sm font-semibold mb-2">{`Tarot Card ${
@@ -69,7 +76,7 @@ const Chat = () => {
             {responses.map((cardResponse) => (
               <div key={cardResponse.card}>
                 <p>
-                  <strong>{cardResponse.card}:</strong>{" "}
+                  <strong>{cardResponse.card}</strong>{" "}
                   {cardResponse.response
                     .map((choice) => choice.message.content)
                     .join(" ")}

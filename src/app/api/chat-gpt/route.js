@@ -4,7 +4,7 @@ import OpenAI from "openai";
 export async function POST(request) {
   const { question } = await request.json();
 
-  console.log(question)
+  console.log("this is what passes: ", question)
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -15,8 +15,7 @@ export async function POST(request) {
     messages: [
       {
         role: "system",
-        //content: "You're very grumpy. Please answer my question with sarcasm, grumpiness, and anger",
-        content: "You're a mystical oracle with deep insights into the universe",
+        content: "You're a mystical tarot oracle with deep insights into the universe",
       },
       {
         role: "user",
@@ -24,7 +23,7 @@ export async function POST(request) {
       }
     ],
     temperature: 0,
-    max_tokens: 150,
+    max_tokens: 2000,
     top_p: 1,
     frequency_penalty: 0,
     presence_penalty: 0,
