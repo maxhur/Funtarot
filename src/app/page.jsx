@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import  { promises as fs } from "fs"
 
 
-const Chat = () => {
+const Home = () => {
   const [tarotCards, setTarotCards] = useState(["", "", ""]);
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState("");
@@ -44,7 +44,7 @@ const Chat = () => {
   
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div className="bg-gray-100 min-h-screen flex items-start justify-center">
       <div className="bg-white p-8 rounded shadow-md">
         <h1 className="text-3xl font-bold mb-4">Tarot Card Reading</h1>
 
@@ -91,11 +91,13 @@ const Chat = () => {
           </div>
         )}
       </div>
+      <div className="bg-gray-100 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow-md">
         {/* <h1>{tarotData.cards.name}</h1> */}
+      </div>
       </div>
     </div>
   );
 };
 
-export default Chat;
+export default Home;
