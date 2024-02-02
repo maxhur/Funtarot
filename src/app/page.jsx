@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import  { promises as fs } from "fs"
+
 
 const Chat = () => {
   const [tarotCards, setTarotCards] = useState(["", "", ""]);
@@ -32,11 +34,14 @@ const Chat = () => {
 
       cardResponses.push({ response: result.choices });
       setResponses(cardResponses);
-      console.log(cardResponses)
+      console.log(cardResponses);
     } catch (error) {
       console.error("Error fetching response:", error);
     }
   };
+  
+  
+  
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center">
@@ -85,6 +90,9 @@ const Chat = () => {
             ))}
           </div>
         )}
+      </div>
+      <div className="bg-white p-8 rounded shadow-md">
+        {/* <h1>{tarotData.cards.name}</h1> */}
       </div>
     </div>
   );
