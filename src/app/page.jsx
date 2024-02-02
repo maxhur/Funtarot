@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import  { promises as fs } from "fs"
+import tarot from "../app/_data/tarot.json"
 
 
 const Home = () => {
@@ -10,13 +10,14 @@ const Home = () => {
 
   const handleQuestionSubmit = async () => {
     try {
+      // receives responses from fetch
       const cardResponses = [];
       let questionCard = "";
 
+      //combines tarot card input
       for (const card of tarotCards) {
         questionCard += card + ",";
       }
-
       questionCard =
         "my three cards for past present and future are " + questionCard;
 
@@ -39,9 +40,6 @@ const Home = () => {
       console.error("Error fetching response:", error);
     }
   };
-  
-  
-  
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-start justify-center">
@@ -93,7 +91,7 @@ const Home = () => {
       </div>
       <div className="bg-gray-100 min-h-screen flex items-center justify-center">
       <div className="bg-white p-8 rounded shadow-md">
-        {/* <h1>{tarotData.cards.name}</h1> */}
+        <h1>{tarot.cards[0].name}</h1>
       </div>
       </div>
     </div>
