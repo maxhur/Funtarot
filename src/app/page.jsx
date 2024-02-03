@@ -44,7 +44,7 @@ const Home = () => {
           questionCard += card + ",";
         }
       } else {
-        questionCard += card;
+        questionCard += tarotCards;
       }
 
       questionCard =
