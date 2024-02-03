@@ -1,12 +1,36 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import tarot from "../app/_data/tarot.json"
-
+import tarot from "../app/_data/tarot.json";
 
 const Home = () => {
-  const [tarotCards, setTarotCards] = useState(["", "", ""]);
+  const [inquiry, setInquiry] = useState("");
+  const [tarotCards, setTarotCards] = useState([""]);
   const [responses, setResponses] = useState([]);
-  const [loading, setLoading] = useState("");
+  //const [loading, setLoading] = useState("");
+  const [drawnCard, setDrawnCard] = useState(null);
+
+  const getRandomNumber = function (min, max, count) {
+    const uniqueNumbers = new Set();
+
+    while (uniqueNumbers.size < count) {
+      const randomNumber = Math.floor(Math.random() * (max - min + 1) + min);
+      uniqueNumbers.add(randomNumber);
+    }
+
+    return Array.from(uniqueNumbers);
+  };
+
+  const drawCard = (min, max, count) => {
+    let chosenCard = [];
+
+    let chosenIndex = getRandomNumber(min, max, count);
+
+    for (let i of chosenIndex) {
+      chosenCard.push(tarot.cards[i]);
+    }
+
+    return chosenCard;
+  };
 
   const handleQuestionSubmit = async () => {
     try {
@@ -15,9 +39,14 @@ const Home = () => {
       let questionCard = "";
 
       //combines tarot card input
-      for (const card of tarotCards) {
-        questionCard += card + ",";
+      if (tarotCards.count > 1) {
+        for (const card of tarotCards) {
+          questionCard += card + ",";
+        }
+      } else {
+        questionCard += card;
       }
+
       questionCard =
         "my three cards for past present and future are " + questionCard;
 
@@ -46,24 +75,32 @@ const Home = () => {
       <div className="bg-white p-8 rounded shadow-md">
         <h1 className="text-3xl font-bold mb-4">Tarot Card Reading</h1>
 
-        {tarotCards.map((card, index) => (
-          <div key={index} className="mb-4">
-            <label className="block text-sm font-semibold mb-2">{`Tarot Card ${
-              index + 1
-            }:`}</label>
-            <input
-              type="text"
-              value={tarotCards[index]}
-              onChange={(e) => {
-                const updatedCards = [...tarotCards];
-                updatedCards[index] = e.target.value;
-                setTarotCards(updatedCards);
-              }}
-              className="w-full p-2 border border-gray-300 rounded text-black"
-              placeholder={`Type your Tarot Card ${index + 1} here`}
-            />
-          </div>
-        ))}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold mb-2"></label>
+          <input
+            type="text"
+            onChange={(e) => {
+              updateInquiry = e.target.value;
+              setInquiry(updateInquiry);
+            }}
+            className="w-full p-2 border border-gray-300 rounded text-black"
+            placeholder={`What's on your mind?`}
+          />
+        </div>
+        <div>
+          <button
+            onClick={() => {
+              // Replace the arguments with your desired range and count
+              const drawnCards = drawCard(0, tarot.nhits, 1); // draws 1 card
+              console.log(drawnCards);
+              setTarotCards([...tarotCards, drawnCards[0].name]);
+              setDrawnCard(drawnCards[0]); //update Drawn Card State
+            }}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Draw Cards
+          </button>
+        </div>
 
         {/* Button to trigger the reading */}
         <button
@@ -90,9 +127,13 @@ const Home = () => {
         )}
       </div>
       <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 rounded shadow-md">
-        <h1>{tarot.cards[0].name}</h1>
-      </div>
+        <div className="bg-white p-8 rounded shadow-md">
+          {drawnCard && (
+            <div>
+              <h1>{drawnCard.name}</h1>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
