@@ -48,7 +48,7 @@ const Home = () => {
       }
 
       questionCard =
-        "my three cards for past present and future are " + questionCard;
+        inquiry + ". The cards I got are:" + questionCard;
 
       const fetchResponse = await fetch("/api/chat-gpt", {
         method: "POST",
@@ -80,7 +80,7 @@ const Home = () => {
           <input
             type="text"
             onChange={(e) => {
-              updateInquiry = e.target.value;
+              let updateInquiry = e.target.value;
               setInquiry(updateInquiry);
             }}
             className="w-full p-2 border border-gray-300 rounded text-black"
