@@ -23,9 +23,10 @@ const Home = () => {
   const drawCard = (min, max, count) => {
     let chosenCard = [];
 
-    let chosenIndex = getRandomNumber(min, max, count);
+    let chosenIndex = getRandomNumber(min, max -1, count);
 
     for (let i of chosenIndex) {
+      console.log("i: ", i)
       chosenCard.push(tarot.cards[i]);
     }
 
@@ -41,7 +42,7 @@ const Home = () => {
       //combines tarot card input
       if (tarotCards.count > 1) {
         for (const card of tarotCards) {
-          questionCard += card + ",";
+          questionCard += card.name + ",";
         }
       } else {
         questionCard += tarotCards;
@@ -168,9 +169,10 @@ const Home = () => {
         {/* Card Drawing Button */}
         <button
           onClick={() => {
-            const drawnCards = drawCard(0, tarot.cards.length, 2);
+            const drawnCards = drawCard(0, tarot.cards.length, 1);
             setTarotCards([...tarotCards, drawnCards]);
             setDrawnCard(drawnCards);
+            console.log(drawnCards)
           }}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
         >
