@@ -1,13 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import tarot from "../app/_data/tarot.json";
+import tarot from "../app/_data/tarot-images.json";
 
 const Home = () => {
   const [inquiry, setInquiry] = useState("");
   const [tarotCards, setTarotCards] = useState([""]);
   const [responses, setResponses] = useState([]);
   //const [loading, setLoading] = useState("");
-  const [drawnCard, setDrawnCard] = useState(null);
+  const [drawnCard, setDrawnCard] = useState([]);
 
   const getRandomNumber = function (min, max, count) {
     const uniqueNumbers = new Set();
@@ -91,10 +91,10 @@ const Home = () => {
           <button
             onClick={() => {
               // Replace the arguments with your desired range and count
-              const drawnCards = drawCard(0, tarot.nhits, 1); // draws 1 card
+              const drawnCards = drawCard(0, tarot.cards.length, 2); // draws 1 card
               console.log(drawnCards);
-              setTarotCards([...tarotCards, drawnCards[0].name]);
-              setDrawnCard(drawnCards[0]); //update Drawn Card State
+              setTarotCards([...tarotCards, drawnCards]);
+              setDrawnCard(drawnCards); //update Drawn Card State
             }}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
@@ -130,7 +130,7 @@ const Home = () => {
         <div className="bg-white p-8 rounded shadow-md">
           {drawnCard && (
             <div>
-              <h1>{drawnCard.name}</h1>
+              <h1>{drawnCard}</h1>
             </div>
           )}
         </div>
