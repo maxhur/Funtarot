@@ -1,4 +1,5 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Funtarot is a tarot reader app built with Next.js and tailwind css. 
+It uses chatGPT API to generate the reaading based on the card drawn in the app. 
 
 ## Getting Started
 
