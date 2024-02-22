@@ -4,12 +4,14 @@ import tarot from "../app/_data/tarot-images.json";
 
 const Home = () => {
   const [inquiry, setInquiry] = useState("");
-  const [tarotCards, setTarotCards] = useState([""]);
+  const [tarotCards, setTarotCards] = useState([]);
   const [responses, setResponses] = useState([]);
   //const [loading, setLoading] = useState("");
   const [drawnCard, setDrawnCard] = useState([]);
+  const [drawButtonClicked, setDrawButtonClicked] = useState(false);
+  const [cardsToDraw, setCardsToDraw] = useState("");
 
-  const getRandomNumber = function (min, max, count) {
+  const getRandomNumber = (min, max, count) => {
     const uniqueNumbers = new Set();
 
     while (uniqueNumbers.size < count) {
@@ -38,17 +40,18 @@ const Home = () => {
       // receives responses from fetch
       const cardResponses = [];
       let questionCard = "";
-
+      console.log(drawnCard.length)
       //combines tarot card input
-      if (tarotCards.count > 1) {
-        for (const card of tarotCards) {
+      if (drawnCard.length > 1) {
+        for (const card of drawnCard) {
           questionCard += card.name + ",";
         }
       } else {
-        questionCard += tarotCards;
+        questionCard += drawnCard[0].name;
       }
-
+      console.log('questionCard cp1: ',questionCard)////////////////////////////////
       questionCard = inquiry + ". The cards I got are:" + questionCard;
+      console.log('questionCard cp3: ',questionCard)////////////////////////////////
 
       const fetchResponse = await fetch("/api/chat-gpt", {
         method: "POST",
@@ -70,19 +73,51 @@ const Home = () => {
     }
   };
 
+  const handleButtonClick = () => {
+    setDrawButtonClicked(true);
+  };
+
+  const handleSelectChange = (e) => {
+    setCardsToDraw(e.target.value);
+  };
+
   return (
     <div className="bg-gray-100 p-5 min-h-screen flex flex-col items-center">
       {/* <div className="bg-white p-8 rounded shadow-md mb-4"> */}
       <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 p-2 whitespace-nowrap">
         What's on your mind?
       </h1>
-      <div className="mb-4 w-96">
-        <input
-          type="text"
-          onChange={(e) => setInquiry(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded text-black"
-          placeholder="What's on your mind?"
-        />
+      <div className="w-auto items-center flex flex-row">
+        <div>
+          <input
+            type="text"
+            onChange={(e) => setInquiry(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded text-black"
+            placeholder="What's on your mind?"
+          />
+        </div>
+        <div className="ml-4 flex flex-row w-full">
+          <label htmlFor="selectInput" className="text-black">
+            How many cards?
+          </label>
+          <select
+            id="selectDrawAmt"
+            value={cardsToDraw}
+            onChange={handleSelectChange}
+            required
+          >
+            <option className="text-black" value="">
+              Select...
+            </option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+          {cardsToDraw && (
+            <p className="text-black">You selected: {cardsToDraw}</p>
+          )}
+        </div>
       </div>
 
       {/* Drawn Card shows here */}
@@ -103,27 +138,37 @@ const Home = () => {
           </div>
         </div>
       )}
-    
+
+      {/* Card Drawing Button */}
       <div>
-        {/* Card Drawing Button */}
-        <button
-          onClick={() => {
-            const drawnCards = drawCard(0, tarot.cards.length, 3);
-            setTarotCards([...tarotCards, drawnCards]);
-            setDrawnCard(drawnCards);
-            console.log(drawnCards);
-          }}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
-        >
-          Draw Cards
-        </button>
+        {!drawButtonClicked && cardsToDraw && inquiry && (
+          <button
+            onClick={() => {
+              const drawnCards = drawCard(0, tarot.cards.length, cardsToDraw);
+              console.log("drawnCards",drawnCards)
+              setTarotCards([...tarotCards, drawnCards]);
+              setDrawnCard(drawnCards);
+              handleButtonClick();
+              console.log(tarotCards)
+            }}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
+          >
+            Draw Cards
+          </button>
+        )}
       </div>
-      <button
-        onClick={handleQuestionSubmit}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Get Reading
-      </button>
+
+      {/* Getting a reading Button */}
+      <div>
+        {drawButtonClicked && (
+          <button
+            onClick={handleQuestionSubmit}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Get a Reading
+          </button>
+        )}
+      </div>
       {responses.length > 0 && (
         <div className="mt-4 text-black">
           <strong>Reading:</strong>
