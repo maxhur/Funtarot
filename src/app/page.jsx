@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import tarot from "../app/_data/tarot-images.json";
+import Image from "next/image";
 
 const Home = () => {
   const [inquiry, setInquiry] = useState("");
-  const [tarotCards, setTarotCards] = useState([]);
+  // const [tarotCards, setTarotCards] = useState([]);
   const [responses, setResponses] = useState([]);
   //const [loading, setLoading] = useState("");
   const [drawnCard, setDrawnCard] = useState([]);
@@ -29,7 +30,10 @@ const Home = () => {
 
     for (let i of chosenIndex) {
       console.log("i: ", i);
-      chosenCard.push(tarot.cards[i]);
+      const cardChosen = tarot.cards[i];
+      cardChosen.rev = Math.floor(Math.random() * 2);
+      cardChosen.name += cardChosen.rev ? " Reversed" : "";
+      chosenCard.push(cardChosen);
     }
 
     return chosenCard;
@@ -40,18 +44,15 @@ const Home = () => {
       // receives responses from fetch
       const cardResponses = [];
       let questionCard = "";
-      console.log(drawnCard.length)
+      console.log(drawnCard.length);
+
       //combines tarot card input
-      if (drawnCard.length > 1) {
-        for (const card of drawnCard) {
-          questionCard += card.name + ",";
-        }
-      } else {
-        questionCard += drawnCard[0].name;
+      for (const card of drawnCard) {
+        questionCard += card.name + "," ;
       }
-      console.log('questionCard cp1: ',questionCard)////////////////////////////////
+      console.log("questionCard cp1: ", questionCard); ////////////////////////////////
       questionCard = inquiry + ". The cards I got are:" + questionCard;
-      console.log('questionCard cp3: ',questionCard)////////////////////////////////
+      console.log("questionCard cp3: ", questionCard); ////////////////////////////////
 
       const fetchResponse = await fetch("/api/chat-gpt", {
         method: "POST",
@@ -83,9 +84,8 @@ const Home = () => {
 
   return (
     <div className="bg-gray-100 p-5 min-h-screen flex flex-col items-center">
-      {/* <div className="bg-white p-8 rounded shadow-md mb-4"> */}
       <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 p-2 whitespace-nowrap">
-        What's on your mind?
+        What&apos;s on your mind?
       </h1>
       <div className="w-auto items-center flex flex-row">
         <div>
@@ -124,14 +124,17 @@ const Home = () => {
       {drawnCard.length > 0 && (
         <div className="bg-white mt-4 mb-4 p-8 rounded shadow-lg text-center">
           <div className="flex flex-wrap justify-center">
-            {drawnCard.map((drawnCards, index) => (
+            {drawnCard.map((cards, index) => (
               //<div key={index} className="flex-none mx-4 mb-4">
               <div key={index} className="flex-none">
-                <h1>{drawnCards.name}</h1>
-                <img
-                  src={`/cards/${drawnCards.img}`}
-                  alt="drawnCard"
-                  className="w-auto h-30" // Adjust image height as needed
+                <h1>{cards.name}</h1>
+                <Image
+                  src={`/cards/${cards.img}`}
+                  alt={`Card: ${cards.name}`}
+                  width={150} // Set the width of the image
+                  height={200} // Set the height of the image
+                  className="w-auto h-30" // Add custom classes if needed
+                  style={{ transform: cards.rev ? "scaleY(-1)" : "scaleY(1)" }} // reverses the image
                 />
               </div>
             ))}
@@ -145,11 +148,11 @@ const Home = () => {
           <button
             onClick={() => {
               const drawnCards = drawCard(0, tarot.cards.length, cardsToDraw);
-              console.log("drawnCards",drawnCards)
-              setTarotCards([...tarotCards, drawnCards]);
+              console.log("drawnCards", drawnCards);
+              // setTarotCards([...tarotCards, drawnCards]);
               setDrawnCard(drawnCards);
+              // shows ask question button
               handleButtonClick();
-              console.log(tarotCards)
             }}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
           >
