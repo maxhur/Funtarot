@@ -8,10 +8,12 @@ export async function POST(request) {
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
+    project: "astro-tarot-project"
   });
 
   const response = await openai.chat.completions.create({
-    model:"gpt-3.5-turbo",
+    // model:"gpt-4o-mini",
+    model:"gpt-4o-mini",
     messages: [
       {
         role: "system",
