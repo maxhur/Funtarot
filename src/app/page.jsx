@@ -2,26 +2,15 @@
 import React, { useState, useEffect } from "react";
 import tarot from "../app/_data/tarot-images.json";
 import Image from "next/image";
+import { getRandomNumber, clickRotate } from "../utils/helper.js";
 
-const Home = () => {
+export default function Home() {
   const [inquiry, setInquiry] = useState("");
-  // const [tarotCards, setTarotCards] = useState([]);
   const [responses, setResponses] = useState([]);
-  //const [loading, setLoading] = useState("");
   const [drawnCard, setDrawnCard] = useState([]);
   const [drawButtonClicked, setDrawButtonClicked] = useState(false);
   const [cardsToDraw, setCardsToDraw] = useState("");
-
-  const getRandomNumber = (min, max, count) => {
-    const uniqueNumbers = new Set();
-
-    while (uniqueNumbers.size < count) {
-      const randomNumber = Math.floor(Math.random() * (max - min + 1) + min);
-      uniqueNumbers.add(randomNumber);
-    }
-
-    return Array.from(uniqueNumbers);
-  };
+  const [fetchCompleted, setFetchCompleted] = useState(false);
 
   const drawCard = (min, max, count) => {
     let chosenCard = [];
@@ -29,7 +18,6 @@ const Home = () => {
     let chosenIndex = getRandomNumber(min, max - 1, count);
 
     for (let i of chosenIndex) {
-      console.log("i: ", i);
       const cardChosen = tarot.cards[i];
       cardChosen.rev = Math.floor(Math.random() * 2);
       cardChosen.name += cardChosen.rev ? " Reversed" : "";
@@ -37,6 +25,16 @@ const Home = () => {
     }
 
     return chosenCard;
+  };
+
+  const drawCards = (cardsToDraw, cardElement) => {
+    if (drawnCard < 1) {
+      const drawnCards = drawCard(0, tarot.cards.length, cardsToDraw);
+      // shows ask question button
+      handleButtonClick();
+      setDrawnCard(drawnCards);
+      clickRotate(cardElement);
+    }
   };
 
   const handleQuestionSubmit = async () => {
@@ -48,11 +46,15 @@ const Home = () => {
 
       //combines tarot card input
       for (const card of drawnCard) {
-        questionCard += card.name + "," ;
+        questionCard += card.name + ",";
       }
-      console.log("questionCard cp1: ", questionCard); ////////////////////////////////
       questionCard = inquiry + ". The cards I got are:" + questionCard;
-      console.log("questionCard cp3: ", questionCard); ////////////////////////////////
+
+      // POST /api/tarot/ {
+      //   user_question
+      //   reading_format
+      //   cards:
+      // }
 
       const fetchResponse = await fetch("/api/chat-gpt", {
         method: "POST",
@@ -64,13 +66,14 @@ const Home = () => {
           someDate: true,
         }),
       });
+
       const result = await fetchResponse.json();
 
       cardResponses.push({ response: result.choices });
-      setResponses(cardResponses);
-      console.log(cardResponses);
+      setFetchCompleted(true);
+      return setResponses(cardResponses);
     } catch (error) {
-      console.error("Error fetching response:", error);
+      setResponses("I'm on a break. Will be back in 5 minutes: ", error);
     }
   };
 
@@ -82,69 +85,92 @@ const Home = () => {
     setCardsToDraw(e.target.value);
   };
 
+  const handleReset = () => {
+    setInquiry("");
+    setResponses([]);
+    setDrawnCard([]);
+    setDrawButtonClicked(false);
+    setCardsToDraw("");
+    setFetchCompleted(false);
+  };
+
   return (
-    <div className="bg-gray-100 p-5 min-h-screen flex flex-col items-center">
+    <div className="bg-black  p-5 min-h-screen flex flex-col items-center">
       <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 p-2 whitespace-nowrap">
         What&apos;s on your mind?
       </h1>
-      <div className="w-auto items-center flex flex-row">
+      <div className="w-full items-center flex flex-col">
         <div>
           <input
             type="text"
+            value={inquiry}
             onChange={(e) => setInquiry(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded text-black"
-            placeholder="What's on your mind?"
+            className="p-2 border border-gray-300 rounded text-black"
+            placeholder="?"
           />
         </div>
-        <div className="ml-4 flex flex-row w-full">
+        <div className="flex flex-col">
           <label htmlFor="selectInput" className="text-black">
             How many cards?
           </label>
-          <select
-            id="selectDrawAmt"
-            value={cardsToDraw}
-            onChange={handleSelectChange}
-            required
-          >
-            <option className="text-black" value="">
-              Select...
-            </option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
+
           {cardsToDraw && (
             <p className="text-black">You selected: {cardsToDraw}</p>
           )}
         </div>
       </div>
 
-      {/* Drawn Card shows here */}
-      {drawnCard.length > 0 && (
-        <div className="bg-white mt-4 mb-4 p-8 rounded shadow-lg text-center">
-          <div className="flex flex-wrap justify-center">
-            {drawnCard.map((cards, index) => (
-              //<div key={index} className="flex-none mx-4 mb-4">
-              <div key={index} className="flex-none">
-                <h1>{cards.name}</h1>
-                <Image
-                  src={`/cards/${cards.img}`}
-                  alt={`Card: ${cards.name}`}
-                  width={150} // Set the width of the image
-                  height={200} // Set the height of the image
-                  className="w-auto h-30" // Add custom classes if needed
-                  style={{ transform: cards.rev ? "scaleY(-1)" : "scaleY(1)" }} // reverses the image
-                />
+      <div className="cards-wrapper">
+        <div className="card-container">
+          <div className="card" onClick={(e) => drawCards(1, e)}>
+            <div className="card-contents card-front">
+              <Image
+                src={`/cards/cardback.jpg`}
+                alt={`Card: back of the card`}
+                width={300} // Set the width of the image
+                height={350} // Set the height of the image
+                className="card-contents card-front w-300 h-350" // Add custom classes if needed
+                priority
+              />
+
+              <div className="card-depth">
+                <h2>Click card</h2>
               </div>
-            ))}
+            </div>
+
+            <div className="card-contents card-back">
+              {drawnCard.map((cards, index) => (
+                <div
+                  key={index}
+                  //className="flex flex-col items-center mx-4 p-4 text-wrap "
+                >
+                  <Image
+                    src={`/cards/${cards.img}`}
+                    alt={`Card: ${cards.name}`}
+                    width={150} // Set the width of the image
+                    height={200} // Set the height of the image
+                    className="card-contents card-back" // Add custom classes if needed
+                    style={{
+                      transform: cards.rev ? "scaleY(-1)" : "scaleY(1)",
+                    }}
+                  />
+                  <p>{cards.name}</p>
+                </div>
+              ))}
+
+              <div className="card-depth">
+                <h2>Click card again</h2>
+                <hr />
+                <p>To turn back</p>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Card Drawing Button */}
       <div>
-        {!drawButtonClicked && cardsToDraw && inquiry && (
+        {cardsToDraw && inquiry && (
           <button
             onClick={() => {
               const drawnCards = drawCard(0, tarot.cards.length, cardsToDraw);
@@ -163,6 +189,7 @@ const Home = () => {
 
       {/* Getting a reading Button */}
       <div>
+        {/* {drawButtonClicked && !fetchCompleted && ( */}
         {drawButtonClicked && (
           <button
             onClick={handleQuestionSubmit}
@@ -187,9 +214,16 @@ const Home = () => {
           ))}
         </div>
       )}
-    </div>
-    // </div>
-  );
-};
 
-export default Home;
+      {/* Get Another Reading */}
+      {fetchCompleted && (
+        <button
+          onClick={handleReset}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 mt-4"
+        >
+          Reset
+        </button>
+      )}
+    </div>
+  );
+}
