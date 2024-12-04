@@ -42,7 +42,6 @@ export default function Home() {
       // receives responses from fetch
       const cardResponses = [];
       let questionCard = "";
-      console.log(drawnCard.length);
 
       //combines tarot card input
       for (const card of drawnCard) {
@@ -89,9 +88,12 @@ export default function Home() {
     setInquiry("");
     setResponses([]);
     setDrawnCard([]);
+    console.log(document.getElementById("tarotCard"));
+    document.getElementById("tarotCard").classList.toggle("rotated");
     setDrawButtonClicked(false);
     setCardsToDraw("");
     setFetchCompleted(false);
+    //clickRotate(getElementById('tarotCard'))
   };
 
   return (
@@ -99,8 +101,8 @@ export default function Home() {
       <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 p-2 whitespace-nowrap">
         What&apos;s on your mind?
       </h1>
-      <div className="w-full items-center flex flex-col">
-        <div>
+      <div className="items-center flex-col">
+        <div className="questionInput">
           <input
             type="text"
             value={inquiry}
@@ -109,20 +111,11 @@ export default function Home() {
             placeholder="?"
           />
         </div>
-        <div className="flex flex-col">
-          <label htmlFor="selectInput" className="text-black">
-            How many cards?
-          </label>
-
-          {cardsToDraw && (
-            <p className="text-black">You selected: {cardsToDraw}</p>
-          )}
-        </div>
       </div>
 
       <div className="cards-wrapper">
-        <div className="card-container">
-          <div className="card" onClick={(e) => drawCards(1, e)}>
+        <div className="card-container" id="container">
+          <div id="tarotCard" className="card" onClick={(e) => drawCards(1, e)}>
             <div className="card-contents card-front">
               <Image
                 src={`/cards/cardback.jpg`}
@@ -134,7 +127,7 @@ export default function Home() {
               />
 
               <div className="card-depth">
-                <h2>Click card</h2>
+                <h2></h2>
               </div>
             </div>
 
@@ -155,47 +148,29 @@ export default function Home() {
                     }}
                   />
                   <p>{cards.name}</p>
+
+                  <div className="card-depth">
+                    <h2>{cards.name}</h2>
+                    <hr />
+                    <p>what</p>
+                  </div>
                 </div>
               ))}
-
-              <div className="card-depth">
-                <h2>Click card again</h2>
-                <hr />
-                <p>To turn back</p>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Card Drawing Button */}
-      <div>
-        {cardsToDraw && inquiry && (
-          <button
-            onClick={() => {
-              const drawnCards = drawCard(0, tarot.cards.length, cardsToDraw);
-              console.log("drawnCards", drawnCards);
-              // setTarotCards([...tarotCards, drawnCards]);
-              setDrawnCard(drawnCards);
-              // shows ask question button
-              handleButtonClick();
-            }}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
-          >
-            Draw Cards
-          </button>
-        )}
-      </div>
-
       {/* Getting a reading Button */}
-      <div>
+      <div className="getRead">
         {/* {drawButtonClicked && !fetchCompleted && ( */}
         {drawButtonClicked && (
           <button
             onClick={handleQuestionSubmit}
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className="mt-4 group relative px-6 py-3 bg-gray-800 text-gray-300 font-bold rounded-lg shadow-lg hover:bg-gray-700 transition-all duration-300 hover:shadow-gray-500/50 hover:text-white focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-offset-2 focus:ring-offset-gray-900"
           >
-            Get a Reading
+            <span className="absolute inset-0 bg-gradient-to-br from-purple-800 to-purple-600 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-300"></span>
+            <span className="relative z-10">?</span>
           </button>
         )}
       </div>

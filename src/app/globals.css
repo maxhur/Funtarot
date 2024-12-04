@@ -148,3 +148,7 @@ p {
   background: linear-gradient(to top left, #ffa17f, #00223e);
   transform-style: preserve-3d;
 }
+
+.questionInput input {
+  min-width: 250px; 
+}
