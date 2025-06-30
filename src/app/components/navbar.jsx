@@ -8,9 +8,9 @@ export default function Navbar() {
           Tarot App
         </Link>
         <div className="flex space-x-4">
-          <Link href="/readings" className="text-white hover:text-gray-300">
-            Readings
-          </Link>
+          {/* <Link href="/readings" className="text-white hover:text-gray-300">
+            Readings */}
+          {/* </Link> */}
           <Link href="/about" className="text-white hover:text-gray-300">
             About
           </Link>

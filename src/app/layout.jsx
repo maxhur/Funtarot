@@ -1,8 +1,7 @@
 import { Inter, Quintessential} from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/navbar";
-
-
+import Chat from "./components/Chat";
 
 const inter = Inter({ subsets: ["latin"] });
 const quintessential = Quintessential({ subsets: ["latin"], weight: ["400"]});
@@ -17,7 +16,9 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={quintessential.className}>
         <Navbar />
-        {children}</body>
+        <Chat />
+        {/* {children} */}
+        </body>
     </html>
   );
 }

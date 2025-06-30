@@ -1,8 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import tarot from "../app/_data/tarot-images.json";
 import Image from "next/image";
 import { getRandomNumber, clickRotate } from "../utils/helper.js";
+import { v4 as uuid } from "uuid";
+import { useChat } from "@ai-sdk/react";
 
 export default function Home() {
   const [inquiry, setInquiry] = useState("");
@@ -11,6 +13,7 @@ export default function Home() {
   const [drawButtonClicked, setDrawButtonClicked] = useState(false);
   const [cardsToDraw, setCardsToDraw] = useState("");
   const [fetchCompleted, setFetchCompleted] = useState(false);
+  const { messages, input, setInput, append } = useChat();
 
   const drawCard = (min, max, count) => {
     let chosenCard = [];
@@ -37,42 +40,48 @@ export default function Home() {
     }
   };
 
-  const handleQuestionSubmit = async () => {
+  const sendQuestion = async () => {
+    if (!inquiry.trim()) return;
+
     try {
-      // receives responses from fetch
-      const cardResponses = [];
-      let questionCard = "";
-
-      //combines tarot card input
-      for (const card of drawnCard) {
-        questionCard += card.name + ",";
-      }
-      questionCard = inquiry + ". The cards I got are:" + questionCard;
-
-      // POST /api/tarot/ {
-      //   user_question
-      //   reading_format
-      //   cards:
-      // }
-
-      const fetchResponse = await fetch("/api/chat-gpt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question: questionCard,
-          someDate: true,
-        }),
+      // Build the user prompt (question + chosen cards)
+      setInput(inquiry);
+      console.log("Input set to:", inquiry);
+      /* 2️⃣  ask the server */
+      const res = await append({
+        content: input,
+        cards: drawnCard.map((c) => c.name),
+        role: "user",
+        // history: messagesRef.current.map(({ role, text }) => ({
+        //   role,
+        //   content: text,
+        // })),
       });
 
-      const result = await fetchResponse.json();
+      console.log('messages', messages)
 
-      cardResponses.push({ response: result.choices });
-      setFetchCompleted(true);
-      return setResponses(cardResponses);
-    } catch (error) {
-      setResponses("I'm on a break. Will be back in 5 minutes: ", error);
+      setResponses ((prev) => [
+        ...prev,
+        { response: messages }]);
+      //   if (!res.body) return;
+
+      //   const reader = res.body.getReader();
+      //   const decoder = new TextDecoder();
+      //   let running = "";
+
+      //   while (true) {
+      //     const { value, done } = await reader.read();
+      //     if (done) break;
+      //     running += decoder.decode(value, { stream: true });
+      //     setMessages((prev) =>
+      //       prev.map((m) => (m.id === assistantId ? { ...m, text: running } : m))
+      //     );
+      //   }
+    } catch (err) {
+      console.error("Error sending question:", err);
+      setResponses([
+        { response: "🛠️ The oracle is resting. Try again shortly." },
+      ]);
     }
   };
 
@@ -88,7 +97,6 @@ export default function Home() {
     setInquiry("");
     setResponses([]);
     setDrawnCard([]);
-    console.log(document.getElementById("tarotCard"));
     document.getElementById("tarotCard").classList.toggle("rotated");
     setDrawButtonClicked(false);
     setCardsToDraw("");
@@ -99,13 +107,13 @@ export default function Home() {
   return (
     <div className="bg-black  p-5 min-h-screen flex flex-col items-center">
       <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 p-2 whitespace-nowrap">
-        What&apos;s on your mind?
+        What&apos;s on our mind?
       </h1>
       <div className="items-center flex-col">
         <div className="questionInput">
           <input
             type="text"
-            value={inquiry}
+            // value={inquiry}
             onChange={(e) => setInquiry(e.target.value)}
             className="p-2 border border-gray-300 rounded text-black"
             placeholder="?"
@@ -166,7 +174,7 @@ export default function Home() {
         {/* {drawButtonClicked && !fetchCompleted && ( */}
         {drawButtonClicked && (
           <button
-            onClick={handleQuestionSubmit}
+            onClick={sendQuestion}
             className="mt-4 group relative px-6 py-3 bg-gray-800 text-gray-300 font-bold rounded-lg shadow-lg hover:bg-gray-700 transition-all duration-300 hover:shadow-gray-500/50 hover:text-white focus:outline-none focus:ring-4 focus:ring-purple-600 focus:ring-offset-2 focus:ring-offset-gray-900"
           >
             <span className="absolute inset-0 bg-gradient-to-br from-purple-800 to-purple-600 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-300"></span>
@@ -174,21 +182,14 @@ export default function Home() {
           </button>
         )}
       </div>
+      {/* {console.log("responses", responses)}
       {responses.length > 0 && (
-        <div className="mt-4 text-black">
-          <strong>Reading:</strong>
-          {responses.map((cardResponse, index) => (
-            <div key={index}>
-              <p>
-                <strong>{cardResponse.card}</strong>{" "}
-                {cardResponse.response
-                  .map((choice) => choice.message.content)
-                  .join(" ")}
-              </p>
-            </div>
-          ))}
+        <div className="mt-6 max-w-prose whitespace-pre-wrap text-lg leading-relaxed">
+          <strong className="block mb-2 text-purple-400">Reading:</strong>
+          {responses}
         </div>
-      )}
+      )} */}
+      {/* {messages} */}
 
       {/* Get Another Reading */}
       {fetchCompleted && (
