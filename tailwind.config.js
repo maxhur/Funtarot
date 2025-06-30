@@ -12,11 +12,25 @@ module.exports = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      keyframes: {
+        wave: {
+          "0%,100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-0.3em)" },
+        },
+        floating: {
+          "0%,100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-0.5rem)" },
+        },
+      },
+      animation: {
+        wave: "wave 1s ease-in-out infinite",
+        floating: "floating 3s ease-in-out infinite",
+      },
     },
   },
-  plugins: [  
-    require('tailwindcss/nesting'),
-    require('tailwindcss'),
-    require('autoprefixer'),
-],
+  plugins: [
+    require("tailwindcss/nesting"),
+    require("tailwindcss"),
+    require("autoprefixer"),
+  ],
 };
