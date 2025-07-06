@@ -21,10 +21,30 @@ module.exports = {
           "0%,100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-0.5rem)" },
         },
+        glowFade: {
+          "0%": {
+            boxShadow:
+              "0 0 0 3px rgba(255,255,255,0.95), 0 0 14px 6px rgba(255,255,255,0.8)",
+            backgroundColor: "rgba(255,255,255,0.15)",
+            borderColor: "rgba(255,255,255,0.9)",
+          },
+          /* ease out */
+          "60%": {
+            boxShadow:
+              "0 0 0 5px rgba(255,255,255,0.4), 0 0 22px 10px rgba(255,255,255,0.25)",
+            backgroundColor: "rgba(255,255,255,0.08)",
+          },
+          /* fully faded */
+          "100%": {
+            boxShadow: "0 0 0 0 rgba(255,255,255,0)",
+            borderColor: "white", // normal border colour
+          },
+        },
       },
       animation: {
         wave: "wave 1s ease-in-out infinite",
         floating: "floating 3s ease-in-out infinite",
+        glow: "glowFade 1.6s ease-out forwards",
       },
     },
   },
