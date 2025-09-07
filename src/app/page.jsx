@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import tarot from "../app/_data/tarot-images.json";
 import Image from "next/image";
 import { getRandomNumber, clickRotate } from "../utils/helper.js";
-import { v4 as uuid } from "uuid";
+//import { v4 as uuid } from "uuid";
 import { useChat } from "@ai-sdk/react";
 
 export default function Home() {
@@ -34,7 +34,7 @@ export default function Home() {
     if (drawnCard < 1) {
       const drawnCards = drawCard(0, tarot.cards.length, cardsToDraw);
       // shows ask question button
-      handleButtonClick();
+      setDrawButtonClicked(true);
       setDrawnCard(drawnCards);
       clickRotate(cardElement);
     }
@@ -58,11 +58,9 @@ export default function Home() {
         // })),
       });
 
-      console.log('messages', messages)
+      console.log("messages", messages);
 
-      setResponses ((prev) => [
-        ...prev,
-        { response: messages }]);
+      setResponses((prev) => [...prev, { response: messages }]);
       //   if (!res.body) return;
 
       //   const reader = res.body.getReader();
@@ -83,10 +81,6 @@ export default function Home() {
         { response: "🛠️ The oracle is resting. Try again shortly." },
       ]);
     }
-  };
-
-  const handleButtonClick = () => {
-    setDrawButtonClicked(true);
   };
 
   const handleSelectChange = (e) => {
@@ -124,8 +118,10 @@ export default function Home() {
       <div className="cards-wrapper">
         <div className="card-container" id="container">
           <div id="tarotCard" className="card" onClick={(e) => drawCards(1, e)}>
+            {/* Card Back */}
             <div className="card-contents card-front">
               <Image
+                draggable="false"
                 src={`/cards/cardback.jpg`}
                 alt={`Card: back of the card`}
                 width={300} // Set the width of the image
@@ -134,11 +130,13 @@ export default function Home() {
                 priority
               />
 
+              {/* Text above drawn cards */}
               <div className="card-depth">
                 <h2></h2>
               </div>
             </div>
 
+            {/* Drawn Cards */}
             <div className="card-contents card-back">
               {drawnCard.map((cards, index) => (
                 <div
@@ -146,6 +144,7 @@ export default function Home() {
                   //className="flex flex-col items-center mx-4 p-4 text-wrap "
                 >
                   <Image
+                    draggable="false"
                     src={`/cards/${cards.img}`}
                     alt={`Card: ${cards.name}`}
                     width={150} // Set the width of the image
@@ -158,9 +157,9 @@ export default function Home() {
                   <p>{cards.name}</p>
 
                   <div className="card-depth">
+                    <hr />
                     <h2>{cards.name}</h2>
                     <hr />
-                    <p>what</p>
                   </div>
                 </div>
               ))}

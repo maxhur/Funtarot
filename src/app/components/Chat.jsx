@@ -7,13 +7,13 @@ import { getRandomNumber, clickRotate } from "../../utils/helper.js";
 
 export default function Chat() {
   const [drawnCard, setDrawnCard] = useState([]);
-  const [isInputFocused, setIsInputFocused] = useState(false);
   const [isCardDrawn, setIsCardDrawn] = useState(false);
+
   const [highlight, setHighlight] = useState(false);
+  const glowTimerRef = useRef(null); // holds the timeout ID
+  const inputRef = useRef(null); // holds the timeout ID
   const [placeholderText, setPlaceholderText] = useState("Ask anything...");
   const [placeholderChange, setPlaceholderChange] = useState(false);
-
-  //const [drawButtonClicked, setDrawButtonClicked] = useState(false);
 
   const drawCardRandom = (min, max, count) => {
     let chosenCard = [];
@@ -34,7 +34,6 @@ export default function Chat() {
     if (drawnCard.length < 1) {
       const drawnCards = drawCardRandom(0, tarot.cards.length, cardsToDraw);
       // shows ask question button
-      //setDrawButtonClicked(true);
       console.log("drawnCards", drawnCards);
       setDrawnCard(drawnCards);
       clickRotate(cardElement);
@@ -44,9 +43,15 @@ export default function Chat() {
 
   const { messages, input, handleInputChange, handleSubmit } = useChat();
 
-  const showHint = input.length > 0 && drawnCard.length === 0;
   const MIN_CHARS = 10;
   const MAX_CHARS = 100;
+  const GLOW_MS = 2000;
+  const showHint = input.length >= MIN_CHARS && drawnCard.length === 0;
+
+  function isValid() {
+    isCardDrawn ?? console.log("Please draw a card first.");
+    return;
+  }
 
   function onAsk(e) {
     e.preventDefault();
@@ -57,7 +62,12 @@ export default function Chat() {
       return;
     }
 
-    //handleSubmit(e);
+    if (!drawnCard) {
+      console.log("Please draw a card first.");
+      return;
+    }
+
+    handleSubmit(e);
   }
 
   const placeholderMessages = [
@@ -71,6 +81,7 @@ export default function Chat() {
     "Ask, then draw",
     "Type a question first",
     "Pose your question first",
+    "What do you wish to ask?",
   ];
 
   /* pick one at random */
@@ -82,11 +93,21 @@ export default function Chat() {
   }
 
   function flashHighlight() {
-    input.length < 1 && !placeholderChange
-      ? setPlaceholderText(getRandomPlaceholder())
-      : placeholderText;
-    setHighlight(true); // apply .animate-glow
-    setTimeout(() => setHighlight(false), 1600); // remove after it finishes
+    inputRef.current?.focus();
+
+    if (input.length < 1 && !placeholderChange) {
+      setPlaceholderText(getRandomPlaceholder());
+    }
+
+    if (!highlight) setHighlight(true); // only set once
+    clearTimeout(glowTimerRef.current);
+
+    glowTimerRef.current = setTimeout(() => {
+      setHighlight(false); // hide after last  timeout
+      glowTimerRef.current = null; // clean up
+    }, GLOW_MS);
+
+    console.log("glow timer ref after:", glowTimerRef.current);
   }
 
   const isInputValid = input.length >= MIN_CHARS && input.length <= MAX_CHARS;
@@ -103,55 +124,53 @@ export default function Chat() {
               className={`w-full p-2 border border-zinc-300 dark:bg-zinc-900 dark:border-zinc-800 rounded shadow-xl ${
                 highlight ? "animate-glow" : ""
               }`}
+              ref={inputRef}
               value={input}
               placeholder={placeholderText}
               disabled={isCardDrawn}
               id="questionInput"
-              onFocus={() => setIsInputFocused(true)}
-              onBlur={() => setIsInputFocused(false)}
               onChange={handleInputChange}
             />
             <div className="mt-1 text-xs">
-              <p hidden={input.length > MIN_CHARS} className="text-left">
+              <p hidden={input.length >= MIN_CHARS} className="text-left">
                 minimum {MIN_CHARS} characters
               </p>
-              <p hidden={input.length < MAX_CHARS} className="text-right">
+              <p hidden={input.length <= MAX_CHARS} className="text-right">
                 maximum {MAX_CHARS} characters
               </p>
             </div>
-            <button
-              type="submit"
-              //disabled={input.trim().length < MIN_CHARS}
-              className="hidden"
-            />
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={!isInputValid || !isCardDrawn}
+                className=" bg-white text-black font-bold py-1 px-4 rounded mt-4 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
+              >
+                Ask the Card
+              </button>
+            </div>
           </form>
         </div>
-        <div
-          className="h-4 w-full bg-gradient-to-b from-black via-black/70 to-transparent
-                  pointer-events-none"
-        />
-        <div className="relative overflow-visible">
-          {/* ✨ floating hint */}
-          {showHint && (
-            <div
-              className="pointer-events-none relative -top-5 
-                 flex justify-center animate-floating z-30"
-            >
-              {"Click the card to draw".split("").map((ch, i) => (
-                <span
-                  key={i}
-                  className="inline-block text-sm font-semibold text-white animate-wave"
-                  style={{ animationDelay: `${i * 0.05}s` }}
-                >
-                  ˝{ch}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
       </header>
+
       {/* ──────────────────────────────────────────────── */}
-      <div className="cards-wrapper mt-8">
+      <div className="cards-wrapper mt-8 relative">
+        {showHint && (
+          <div
+            className="pointer-events-none absolute -top-7 left-11 transform -translate-x-1/2 -translate-y-8
+       flex justify-center animate-floating z-30"
+          >
+            {"Click the card to draw".split("").map((ch, i) => (
+              <span
+                key={i}
+                className="inline-block text-sm font-semibold text-white animate-wave"
+                style={{ animationDelay: `${i * 0.04}s` }}
+              >
+                "{ch}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="card-container" id="container">
           <div
             id="tarotCard"
@@ -162,6 +181,7 @@ export default function Chat() {
           >
             <div className="card-contents card-front">
               <Image
+                draggable="false"
                 src={`/cards/cardback.jpg`}
                 alt={`Card: back of the card`}
                 width={300} // Set the width of the image
