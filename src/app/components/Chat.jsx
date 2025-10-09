@@ -1,6 +1,6 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import tarot from "../../app/_data/tarot-images.json";
 import { getRandomNumber, clickRotate } from "../../utils/helper.js";
@@ -12,6 +12,7 @@ export default function Chat() {
   const [highlight, setHighlight] = useState(false);
   const glowTimerRef = useRef(null); // holds the timeout ID
   const inputRef = useRef(null); // holds the timeout ID
+  const messagesEndRef = useRef(null); // ref for auto-scroll
   const [placeholderText, setPlaceholderText] = useState("Ask anything...");
   const [placeholderChange, setPlaceholderChange] = useState(false);
 
@@ -111,6 +112,18 @@ export default function Chat() {
   }
 
   const isInputValid = input.length >= MIN_CHARS && input.length <= MAX_CHARS;
+
+  // Auto-scroll to bottom when messages update
+  useEffect(() => {
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  function scrollToSection(id) {
+    const element = document.getElementById(id);
+    element?.scrollIntoView({ behavior: "smooth" }); // Optional: smooth scrolling
+  }
 
   return (
     <div className="bg-black min-h-screen flex flex-col items-center">
@@ -233,6 +246,7 @@ export default function Chat() {
             })}
           </div>
         ))}
+        <div ref={messagesEndRef} />
       </div>
     </div>
   );
